@@ -12,29 +12,6 @@ if (!$koneksi) {
 }
 
 
-if (isset($_POST['simpan_profil'])) {
-    $id = $_POST['id'];
-    $nama = $_POST['nama'];
-    $telepon = $_POST['telepon'];
-    $email = $_POST['email'];
-    $level_member = $_POST['level_member'];
-
-    $update = mysqli_query($koneksi, "UPDATE pelanggan SET 
-        nama = '$nama',
-        telepon = '$telepon',
-        email = '$email',
-        level_member = '$level_member'
-        WHERE id = '$id'
-    ");
-
-    if ($update) {
-        header("Location: progres3.php?id=" . $id);
-        exit;
-    } else {
-        echo "Data gagal diperbarui: " . mysqli_error($koneksi);
-    }
-}
-
 $selectSemua = mysqli_query($koneksi, "SELECT * FROM pelanggan");
 
 $id = isset($_GET['id']) ? $_GET['id'] : '';
@@ -84,7 +61,7 @@ $profil = mysqli_fetch_assoc($selectProfil);
                 </div>
                 <div>
                     <a href="progres1.php" class="btn btn-outline-dark btn-sm">
-                        + Tambah Pelanggan Baru
+                        Kembali ke Daftar Pelanggan
                     </a>
                 </div>
             </div>
@@ -96,8 +73,8 @@ $profil = mysqli_fetch_assoc($selectProfil);
             </div>
         <?php } else { ?>
 
-            <div class="row g-4">
-                <div class="col-md-4">
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-md-7 col-lg-6">
                     <div class="card border rounded-3 shadow-sm mb-4">
                         <div class="card-body text-center p-4">
                            
@@ -165,49 +142,6 @@ $profil = mysqli_fetch_assoc($selectProfil);
                     </div>
                 </div>
 
-                <div class="col-md-8">
-                    <div class="card border rounded-3 shadow-sm">
-                        <div class="card-body p-4">
-                            <h2 class="fw-semibold fs-6 mb-1">Edit Informasi Profil</h2>
-                            <p class="text-muted small mb-4">Perbarui data nama, kontak, dan level member pengguna.</p>
-
-                            <form method="POST">
-                                <input type="hidden" name="id" value="<?= $profil['id']; ?>">
-
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium small">Nama Lengkap</label>
-                                        <input type="text" class="form-control form-control-sm rounded-1" required name="nama" value="<?= htmlspecialchars($profil['nama']); ?>">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium small">Nomor Telepon</label>
-                                        <input type="text" class="form-control form-control-sm rounded-1" required name="telepon" value="<?= htmlspecialchars($profil['telepon']); ?>">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium small">Email</label>
-                                        <input type="email" class="form-control form-control-sm rounded-1" name="email" value="<?= htmlspecialchars(isset($profil['email']) ? $profil['email'] : ''); ?>">
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-medium small">Level Member</label>
-                                        <select class="form-select form-select-sm rounded-1" required name="level_member">
-                                            <option value="Basic" >Basic</option>
-                                            <option value="Gold" >Gold</option>
-                                            <option value="VIP" >VIP</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                                    <a href="profil_pengguna.php?id=<?= $profil['id']; ?>" class="btn btn-outline-secondary btn-sm rounded-1">Batal</a>
-                                    <button type="submit" name="simpan_profil" class="btn btn-dark btn-sm rounded-1">Simpan Perubahan</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
 
         <?php } ?>

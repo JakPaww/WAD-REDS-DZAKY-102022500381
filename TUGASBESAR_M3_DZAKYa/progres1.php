@@ -38,22 +38,31 @@ if (isset($_POST['simpan_profil'])) {
     $telepon = $_POST['telepon'];
     $email = $_POST['email'];
     $level_member = $_POST['level_member'];
-
-    $update = mysqli_query($koneksi, "UPDATE pelanggan SET 
-        nama = '$nama', telepon = '$telepon', email = '$email', level_member = '$level_member' WHERE id = '$id'"
-    );
+    $update = mysqli_query($koneksi, "UPDATE pelanggan SET nama = '$nama', telepon = '$telepon', email = '$email', level_member = '$level_member' WHERE id = '$id'");
 
     if ($update) {
-        header("Location: progres3.php?id=" . $id);
+        header("Location: progres1.php");
         exit;
     } else {
         echo "Data gagal diperbarui: " . mysqli_error($koneksi);
     }
 }
 
+if (isset($_POST['ubah_status'])) {
+    $id = $_POST['id'];
+    $update = mysqli_query($koneksi, "UPDATE pelanggan SET status = CASE WHEN status = 'Aktif' THEN 'Tidak Aktif' ELSE 'Aktif' END WHERE id = '$id'");
+
+    if ($update) {
+        header("Location: progres1.php");
+        exit;
+    } else {
+        echo "Status gagal diperbarui: " . mysqli_error($koneksi);
+    }
+}
+
 if (isset($_GET['hapus'])) {
     $id = $_GET['hapus'];
-    $delete = mysqli_query($koneksi, "DELETE FROM pelanggan WHERE id = $id");
+    $delete = mysqli_query($koneksi, "DELETE FROM pelanggan WHERE id = '$id'");
     
     if ($delete) {
         header("Location: progres1.php");
@@ -63,10 +72,6 @@ if (isset($_GET['hapus'])) {
     }
 }
 
-$id = isset($_GET['id']) ? $_GET['id'] : '';
-
-$selectProfil = mysqli_query($koneksi, "SELECT * FROM pelanggan WHERE id = '$id'");
-$profil = mysqli_fetch_assoc($selectProfil);
 $select = mysqli_query($koneksi, "SELECT * FROM pelanggan");
 $daftarPelanggan = mysqli_num_rows($select);
 $no = 1;
@@ -195,18 +200,22 @@ $no = 1;
                                     <?= $data['level_member']; ?>
                                 </td>
                                 <td>
-                                    <a href="?update=<?= $data['id'] ?>" class="btn btn-sm text-bg-success ">
-                                        <?= $data['status']; ?>
-                                    </a>
+                                    <form method="POST" class="d-inline">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars($data['id'], ENT_QUOTES); ?>">
+                                        <button type="submit" name="ubah_status" class="btn btn-sm <?= $data['status'] === 'Aktif' ? 'text-bg-success' : 'text-bg-secondary'; ?>">
+                                            <?= htmlspecialchars($data['status']); ?>
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>
-                                    <a
-                                        class="btn btn-warning btn-sm rounded-1" data-bs-toggle="modal" data-bs-target="#ModalUbah">
-                                            Edit
+                                    <button type="button" class="btn btn-warning btn-sm rounded-1" data-bs-toggle="modal" data-bs-target="#ModalUbah" data-id="<?= htmlspecialchars($data['id'], ENT_QUOTES); ?>" data-nama="<?= htmlspecialchars($data['nama'], ENT_QUOTES); ?>" data-telepon="<?= htmlspecialchars($data['telepon'], ENT_QUOTES); ?>" data-email="<?= htmlspecialchars($data['email'], ENT_QUOTES); ?>" data-level="<?= htmlspecialchars($data['level_member'], ENT_QUOTES); ?>">
+                                        Edit
+                                    </button>
+                                    <a href="?hapus=<?= rawurlencode($data['id']); ?>" class="btn btn-danger btn-sm rounded-1" onclick="return confirm('Hapus pelanggan ini?')">
+                                        Hapus
                                     </a>
-                                    <a href="?hapus=<?= $data['id'] ?>"
-                                        class="btn btn-danger btn-sm rounded-1" > 
-                                            Hapus
+                                    <a href="progres3.php?id=<?= rawurlencode($data['id']); ?>" class="btn btn-outline-dark btn-sm rounded-1">
+                                        Profil
                                     </a>
                                 </td>
                             </tr>
@@ -226,30 +235,30 @@ $no = 1;
                         </div>
                         <div class="modal-body">
                             <form method="POST">
-                                <input type="hidden" name="id" value="<?= $profil['id']; ?>">
+                                <input type="hidden" name="id" id="editId">
 
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">Nama Lengkap</label>
-                                        <input type="text" class="form-control form-control-sm rounded-1" required name="nama" value="<?= htmlspecialchars($profil['nama']); ?>">
+                                        <input type="text" class="form-control form-control-sm rounded-1" required name="nama" id="editNama">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">Nomor Telepon</label>
-                                        <input type="text" class="form-control form-control-sm rounded-1" required name="telepon" value="<?= htmlspecialchars($profil['telepon']); ?>">
+                                        <input type="text" class="form-control form-control-sm rounded-1" required name="telepon" id="editTelepon">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">Email</label>
-                                        <input type="email" class="form-control form-control-sm rounded-1" name="email" value="<?= htmlspecialchars(isset($profil['email']) ? $profil['email'] : ''); ?>">
+                                        <input type="email" class="form-control form-control-sm rounded-1" name="email" id="editEmail">
                                     </div>
 
                                     <div class="col-md-6">
                                         <label class="form-label fw-medium small">Level Member</label>
-                                        <select class="form-select form-select-sm rounded-1" required name="level_member">
-                                            <option value="Basic" >Basic</option>
-                                            <option value="Gold" >Gold</option>
-                                            <option value="VIP" >VIP</option>
+                                        <select class="form-select form-select-sm rounded-1" required name="level_member" id="editLevel">
+                                            <option value="Basic">Basic</option>
+                                            <option value="Gold">Gold</option>
+                                            <option value="VIP">VIP</option>
                                         </select>
                                     </div>
                                 </div>
@@ -264,6 +273,16 @@ $no = 1;
         </div>
         </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('ModalUbah').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            document.getElementById('editId').value = button.dataset.id;
+            document.getElementById('editNama').value = button.dataset.nama;
+            document.getElementById('editTelepon').value = button.dataset.telepon;
+            document.getElementById('editEmail').value = button.dataset.email;
+            document.getElementById('editLevel').value = button.dataset.level;
+        });
+    </script>
 </body>
 
 </html>
